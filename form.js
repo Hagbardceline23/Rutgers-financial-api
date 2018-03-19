@@ -1,3 +1,17 @@
+
+
+
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCjxW2V55NbUZt3OqESMS74k0SycmA926k",
+    authDomain: "rutgers-contact-list.firebaseapp.com",
+    databaseURL: "https://rutgers-contact-list.firebaseio.com",
+    projectId: "rutgers-contact-list",
+    storageBucket: "rutgers-contact-list.appspot.com",
+    messagingSenderId: "225697281146"
+  };
+  firebase.initializeApp(config);
+  var contactDatabase = firebase.database();
 $(function()
 {
     function after_form_submitted(data) 
