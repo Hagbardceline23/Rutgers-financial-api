@@ -1,4 +1,4 @@
-/* my-financial.js */
+/* financial.js */
 // **************************************************************************
 // GLOBALS
 //
@@ -39,6 +39,7 @@ const AlphaTSSuffix = AlphaSuffix;
     "description": ""
   };
 
+
   firebase.initializeApp(config);
 
   database = firebase.database();
@@ -46,6 +47,9 @@ const AlphaTSSuffix = AlphaSuffix;
   // **************************************************************************
 
 $(document).ready(() => {
+  var userEmail = "",
+      userAuthenticated = false;
+
   // -----------------------------------------------------------------------------------------
   // initialize database parent objects
   function initdb() {
@@ -55,7 +59,7 @@ $(document).ready(() => {
 
   // --------------------------------------------------------------------------
   // buildWatchBtn uses adds watch button
-  // the stocks information
+  // to stocks information window
   function buildWatchBtn(stockSym) {
     var watchBtn = $("<button>");
 
@@ -338,6 +342,8 @@ $(document).ready(() => {
   function addToWatchList(event) {
     var stockSymbol = $(this).attr("stock-id");
 
+    console.log("in addToWatchList, currentUser: " + userEmail);
+
     event.preventDefault();
     // empty out stock-ticker content
     $("#stock-ticker-content").empty();
@@ -355,6 +361,94 @@ $(document).ready(() => {
     renderWatchTable(stockSymbol);
   }
 
+  // -----------------------------------------------------------------------
+  // loginRoutine() records a login attempt
+  //
+  function loginRoutine(ev) {
+    var email = $("#appEmail").val(),
+        pswrd = $("#appPassword").val(),
+        auth = firebase.auth(),
+        loginSuccess = true,
+        promise;
+
+    // error check email and password later
+
+    ev.preventDefault();
+    console.log("in loginRoutine()");
+
+    // sign in
+    promise = auth.signInWithEmailAndPassword(email, pswrd);
+    promise.catch((error) => console.log(error.message));
+
+    if (loginSuccess) {
+      $("#appEmail, #appPassword").val("");
+      $("#pLogin").modal("hide");
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // signupRoutine() signs up a user to the app
+  //
+  function signupRoutine(ev) {
+    var fname = $("#appFirstname").val(),
+        lname = $("#appLastname").val(),
+        email = $("#signupEmail").val(),
+        pswrd = $("#signupPassword").val(),
+        confirmPswrd = $("#confirmPassword").val(),
+        auth = firebase.auth(),
+        signupSuccess = true,
+        promise;
+
+    // error check email and password check later
+
+    // function validateEmail(email)
+    // {
+    // var re = /^(?:[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/;
+    // return re.test(email);
+    // }
+
+    ev.preventDefault();
+    console.log("in signupRoutine()");
+
+    // sign up
+    promise = auth.createUserWithEmailAndPassword(email, pswrd);
+    promise.catch((error) => console.log(error.message));
+
+    if (signupSuccess) {
+      $("#appFirstname, #appLastname, #signupEmail, #signupPassword, #confirmPassword").val("");
+      $("#pSignup").modal("hide");
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // add event listener for logout
+  //
+  $("#btnLogout").on("click", () => {
+    console.log("in btnLogout()");
+    firebase.auth().signOut();
+  });
+
+  // ----------------------------------------------------------------------
+  // add authentication listener state using firebase
+  //
+  firebase.auth().onAuthStateChanged((firebaseUser) => {
+    if (firebaseUser) {
+      console.log("Logged in User is: " + JSON.stringify(firebaseUser));
+      $("#btnLogout").removeClass("d-none");
+      $("#modalLogin").addClass("d-none");
+      $("#loggedInUser").text(firebaseUser.email);
+      userEmail = firebaseUser.email;
+      userAuthenticated = true;
+    } else {
+      console.log("Not logged in.");
+      $("#btnLogout").addClass("d-none");
+      $("#modalLogin").removeClass("d-none");
+      $("#loggedInUser").empty();
+      userEmail = "";
+      userAuthenticated = false;
+    }
+  });
+
   initdb();
   $("#watch-table-header").hide();
   $("#watchlist-caption").hide();
@@ -364,6 +458,12 @@ $(document).ready(() => {
 
   // remove the selected stock from watch list
   $(document).on("click", ".remove-from-watchlist", removeFromWatchList);
+
+  // login button
+  $(document).on("click", "#btnLogin", loginRoutine);
+
+  // signup routine
+  $(document).on("click", "#btnSignup", signupRoutine);
 
   // End of document.ready()
 });
