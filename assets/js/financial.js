@@ -48,8 +48,38 @@ const MinPassLength = 7;
   // **************************************************************************
 
 $(document).ready(() => {
-  var userEmail = "",
-      userAuthenticated = false;
+  var appUser = {
+    "firstName": "",
+    "lastName": "",
+    "email": "",
+    "uid": "",
+    "authenticated": false,
+    addToWatch(sym) {
+      var firedbPath = "users/" + this.uid + "/watchlist/" + sym;
+
+      database.ref(firedbPath).update(
+        {sym},
+        (errorObject) => {
+          console.log("Errors handled: " + JSON.stringify(errorObject));
+        }
+      );
+
+      return true;
+    },
+    removeFromWatch(sym) {
+      var firedbPath = "users/" + this.uid + "/watchlist/" + sym;
+
+      database.ref(firedbPath).remove().
+        then(() => {
+            console.log("Removal of " + firedbPath + " succeeded.");
+          }).
+        catch((errorObject) => {
+            console.log("Remove failed: " + errorObject.message);
+      });
+
+      return true;
+    }
+  };
 
   // -----------------------------------------------------------------------------------------
   // initialize database parent objects
@@ -61,28 +91,29 @@ $(document).ready(() => {
   // addUserToDb() takes in three parameters. If the user node does not already
   //  exist in the database, the node is added based on email.
   //
-  function addUserToDb(fname, lname, email) {
-    var userRef;
+  function addUserToDb() {
+    var dbPath;
 
-    console.log("in addUserToDb(): " + fname, lname, email);
-    // create users reference
-    userRef = database.ref().child("users");
-    // if users node does not exist create
-    database.ref().once("value", (snapshot) => {
-      if (snapshot.child("users").exists()) {
-          console.log("users child exists under root");
-      } else {
-          // create users node by pushing
-        // database.ref().push("users");
-        console.log("users node does not exist under root");
-      }
-   });
+    console.log("in addUserToDb(): " + JSON.stringify(appUser));
+    dbPath = "users/" + appUser.uid;
 
-    // if users/email child does not exist create it
+    // if users node does not exist, create path
+    database.ref(dbPath).update({
+      "email": appUser.email,
+      "firstName": appUser.firstName,
+      "lastName": appUser.lastName,
+      "dateAdded": firebase.database.ServerValue.TIMESTAMP
+    });
 
-    // if users/email/watchlist node does not exist, create it
+  }
 
-    // if users/email/portfolio does not exist, create it
+  // -----------------------------------------------------------------------------
+  // eraseCurrentWatchlist() emptys out watch table and hides headers
+  //
+  function eraseCurrentWatchlist() {
+    $("#watch-table-header").hide();
+    $("#watchlist-caption").hide();
+    $("#watch-table").empty();
   }
 
   // -----------------------------------------------------------------------------
@@ -194,6 +225,9 @@ $(document).ready(() => {
     var dbPath = "watchlist/" + sym;
 
     currentWatchRow.currentPrice = price;
+    if (appUser.authenticated) {
+      appUser.addToWatch(sym);
+    }
     database.ref(dbPath).update({"stockPrice": price});
   }
 
@@ -366,6 +400,7 @@ $(document).ready(() => {
     var stockSymbol = $(this).attr("data-name");
 
     console.log("in removeFromWatchList, remove: " + stockSymbol);
+    appUser.removeFromWatch(stockSymbol);
 
     // remove row so as to not repeat stock symbol on watchlist
     $("#wrow-" + stockSymbol).remove();
@@ -411,7 +446,7 @@ $(document).ready(() => {
   function addToWatchList(event) {
     var stockSymbol = $(this).attr("stock-id");
 
-    console.log("in addToWatchList, currentUser: " + userEmail);
+    console.log("in addToWatchList, currentUser: " + appUser.email);
 
     event.preventDefault();
     // empty out stock-ticker content
@@ -458,6 +493,15 @@ $(document).ready(() => {
       $("#appEmail, #appPassword").val("");
       $("#nonExistentUser").empty();
       $("#pLogin").modal("hide");
+      appUser.email = email;
+      appUser.authenticated = false;
+      database.ref("users/" + email).on("value", (snapshot) => {
+        appUser.firstName = snapshot.val().firstName;
+        appUser.lastName = snapshot.val().lastName;
+        console.log("change in addRestInfoWatchDB: " + change);
+      }, (errorObject) => {
+        console.log("Errors handled: " + JSON.stringify(errorObject));
+      });
     } else {
       $("#pLogin").modal("hide");
     }
@@ -474,6 +518,7 @@ $(document).ready(() => {
         confirmPswrd = $("#confirmPassword").val(),
         auth = firebase.auth(),
         signupSuccess = true,
+        validName = false,
         validEmail = false,
         validPswd = false,
         pswdsMatch = false,
@@ -482,6 +527,17 @@ $(document).ready(() => {
 
     ev.preventDefault();
     console.log("in signupRoutine()");
+    // check name validity
+    if (hasAlpha(fname) && hasAlpha(lname)) {
+      validName = true;
+    } else {
+      console.log("invalid name");
+      htmlText = "Please enter valid name.<br />";
+      $("#appFirstName, #appLastName, #signupPassword, #confirmPassword").val("");
+      $("#signup-error").addClass("text-danger font-weight-bold").
+                        html(htmlText);
+      validName = false;
+    }
 
     // check email validity
     if (validateEmail(email)) {
@@ -493,7 +549,6 @@ $(document).ready(() => {
       $("#signupEmail, #signupPassword, #confirmPassword").val("");
       $("#signup-error").addClass("text-danger font-weight-bold").
                         html(htmlText);
-      $("#signupEmail").val("");
       validEmail = false;
     }
 
@@ -527,19 +582,21 @@ $(document).ready(() => {
 
     // TODO: check if email already exists in database
 
-    signupSuccess = validEmail && validPswd && pswdsMatch
+    signupSuccess = validName && validEmail && validPswd && pswdsMatch
                     ? true
                     : false;
 
     if (signupSuccess) {
       promise = auth.createUserWithEmailAndPassword(email, pswrd);
       promise.catch((error) => console.log(error.message));
+      // console.log("in signupSuccess: uid: " + firebaseUser.uid);
       $("#signup-error").removeClass("text-danger font-weight-bold").
                         empty();
       $("#appFirstName, #appLastName, #signupEmail, #signupPassword, #confirmPassword").val("");
       $("#nonExistentUser").empty();
       $("#pSignup").modal("hide");
-      addUserToDb(fname, lname, email);
+      appUser.firstName = fname;
+      appUser.lastName = lname;
     } else {
       $("#pSignup").modal("show");
     }
@@ -553,19 +610,37 @@ $(document).ready(() => {
     firebase.auth().signOut();
   });
 
+  function doWhenLoggedIn() {
+    console.log("in doWhenLoggedIn appUser: " + appUser);
+    if (appUser.firstName !== "" && appUser.lastName !== "") {
+      addUserToDb();
+    }
+
+    // erase current watchlist
+    eraseCurrentWatchlist();
+
+    // empty current stock ticker
+    $("#stock-input").val("");
+
+    // check user watchlist
+    // checkUserWatchlist();
+  }
+
   // ----------------------------------------------------------------------
   // add authentication listener state using firebase
   //
   firebase.auth().onAuthStateChanged((firebaseUser) => {
     if (firebaseUser) {
-      // console.log("Logged in User is: " + JSON.stringify(firebaseUser));
+      console.log("Logged in User is: " + JSON.stringify(firebaseUser));
       $("#btnLogout").removeClass("d-none");
       $("#modalLogin").addClass("d-none");
       $("#modalSignup").addClass("d-none");
       $("#loggedInUser").addClass("font-weight-bold text-primary mr-1").
                         html("Welcome, " + firebaseUser.email);
-      userEmail = firebaseUser.email;
-      userAuthenticated = true;
+      appUser.email = firebaseUser.email;
+      appUser.uid = firebaseUser.uid;
+      appUser.authenticated = true;
+      doWhenLoggedIn();
     } else {
       console.log("Not logged in.");
       $("#btnLogout").addClass("d-none");
@@ -573,14 +648,16 @@ $(document).ready(() => {
       $("#modalSignup").removeClass("d-none");
       $("#loggedInUser").removeClass("font-weight-bold text-primary mr-1").
                         empty();
-      userEmail = "";
-      userAuthenticated = false;
+      eraseCurrentWatchlist();
+      appUser.email = "";
+      appUser.firstName = "";
+      appUser.lastName = "";
+      appUser.authenticated = false;
     }
   });
 
   initdb();
-  $("#watch-table-header").hide();
-  $("#watchlist-caption").hide();
+  eraseCurrentWatchlist();
 
   // adds the selected stock to watch list
   $(document).on("click", ".watch-button", addToWatchList);
