@@ -78,6 +78,9 @@ $(document).ready(() => {
       });
 
       return true;
+    },
+    getPath() {
+      return "users/" + this.uid + "/watchlist/";
     }
   };
 
@@ -441,6 +444,39 @@ $(document).ready(() => {
   });
 
   // -----------------------------------------------------------------------
+  // renderUserWatchlist() renders the logged in user's watch list
+  //
+  function renderUserWatchlist() {
+    var dbPath = appUser.getPath();
+    // var firebasePath = "users/" + appUser.uid + "/";
+
+        // empty out stock-ticker content
+    $("#stock-ticker-content").empty();
+
+    console.log("in renderUserWatchList() ");
+    console.log("appUser.getPath: " + appUser.getPath());
+
+    database.ref(dbPath).once("value", (snapshot) => {
+      console.log("snapshot: " + JSON.stringify(snapshot));
+      snapshot.forEach((data) => {
+        console.log("The " + data.key + " is " + data.val());
+        // get current price of stock symbol
+        buildBatchURL(data.key, "watch");
+
+        // get yesterday's close price of stock symbol
+        buildTimeSeriesURL(data.key);
+
+        // add row to watchListTable
+        renderWatchTable(data.key);
+      });
+    }, (errorObject) => {
+      console.log("Errors handled: " + JSON.stringify(errorObject));
+    });
+    // $("#financial-text").empty();
+
+  }
+
+  // -----------------------------------------------------------------------
   // addToWatchList adds selected stock to watch list
   //
   function addToWatchList(event) {
@@ -610,6 +646,10 @@ $(document).ready(() => {
     firebase.auth().signOut();
   });
 
+  // -----------------------------------------------------------------------
+  // doWhenLoggedIn() performs series of functions once a user is logged in
+  //  one of them is to call render the current user's customized watch list
+  //
   function doWhenLoggedIn() {
     console.log("in doWhenLoggedIn appUser: " + appUser);
     if (appUser.firstName !== "" && appUser.lastName !== "") {
@@ -623,7 +663,7 @@ $(document).ready(() => {
     $("#stock-input").val("");
 
     // check user watchlist
-    // checkUserWatchlist();
+    renderUserWatchlist();
   }
 
   // ----------------------------------------------------------------------
