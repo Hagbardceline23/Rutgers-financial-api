@@ -122,12 +122,11 @@ $(document).ready(() => {
   // eraseCurrentWatchlist() emptys out watch table and hides headers
   //
   function eraseCurrentWatchlist() {
-    var index = 0,
-        tBody = $("<tbody>");
+    var tBody = $("<tbody>");
 
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
-    $("#watch-table").remove();
+    // $("#watch-table").remove();
     tBody.attr("id","watch-table");
     $("#my-watch-table").append(tBody);
 //    $("#stock-ticker-content").empty();
@@ -141,13 +140,13 @@ $(document).ready(() => {
   // -----------------------------------------------------------------------------
   // eraseCurrentPortfolio() emptys out portfolio table and hides headers
   //
-  function eraseCurrentPortfolio() {
+  // function eraseCurrentPortfolio() {
 
-    $("#portfolio-table-header").hide();
-    $("#portfolio-caption").hide();
-    $("#portfolio-table").empty();
+  //  $("#portfolio-table-header").hide();
+  //  $("#portfolio-caption").hide();
+  //  $("#portfolio-table").empty();
 
-  }
+  // }
 
   // -----------------------------------------------------------------------------
   // hasAlpha() checks if a string has at least one alphabetic character, lower
@@ -695,6 +694,7 @@ $(document).ready(() => {
   //
   $("#btnLogout").on("click", () => {
     console.log("in btnLogout()");
+    database.ref("users/" + appUser.uid).off();
     firebase.auth().signOut();
   });
 
@@ -709,7 +709,7 @@ $(document).ready(() => {
     }
 
     // erase current watchlist
-    eraseCurrentWatchlist();
+    // eraseCurrentWatchlist();
     // eraseCurrentPortfolio();
 
     // empty current stock ticker
@@ -731,10 +731,11 @@ $(document).ready(() => {
     appUser.authenticated = false;
 
     // erase watchlist
-    eraseCurrentWatchlist();
+    // eraseCurrentWatchlist();
 
     // erase portfolio
     // eraseCurrentPortfolio();
+
     // reset current row
     currentWatchRow.symbol = "";
     currentWatchRow.currentPrice = 0;
@@ -768,7 +769,7 @@ $(document).ready(() => {
       doWhenLoggedIn();
     } else {
       console.log("Not logged in.");
-      database.ref("users/" + appUser.uid).off();
+      // database.ref("users/" + appUser.uid).off();
       $("#btnLogout").addClass("d-none");
       $("#modalLogin").removeClass("d-none");
       $("#modalSignup").removeClass("d-none");
