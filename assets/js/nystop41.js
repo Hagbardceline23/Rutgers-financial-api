@@ -35,20 +35,20 @@ $.ajax({
 
 
 
-    $("#url").append("<a href=" + result.results["0"].url + ">" +
-        result.results["0"].url + "</a>");
-    $("#url1").append("<a href=" + result.results["1"].url + ">" +
-        result.results["1"].url + "</a>");
-    $("#url2").append("<a href=" + result.results["2"].url + ">" +
-        result.results["2"].url + "</a>");
-    $("#url3").append("<a href=" + result.results["3"].url + ">" +
-        result.results["3"].url + "</a>");
-    $("#url4").append("<a href=" + result.results["4"].url + ">" +
-        result.results["4"].url + "</a>");
-    $("#url5").append("<a href=" + result.results["5"].url + ">" +
-        result.results["5"].url + "</a>");
-    $("#url6").append("<a href=" + result.results["6"].url + ">" +
-        result.results["5"].url + "</a>");
+    $("#url").append("<a href=" + result.results["0"].url + " " + 'target="_blank"' + ">" +
+        "Article Link" + "</a>");
+    $("#url1").append("<a href=" + result.results["1"].url + " " + 'target="_blank"' + ">" +
+    "Article Link" + "</a>");
+    $("#url2").append("<a href=" + result.results["2"].url + " " + 'target="_blank"' + ">" +
+    "Article Link"+ "</a>");
+    $("#url3").append("<a href=" + result.results["3"].url + " " + 'target="_blank"' + ">" +
+    "Article Link" + "</a>");
+    $("#url4").append("<a href=" + result.results["4"].url + " " + 'target="_blank"' + ">" +
+    "Article Link" + "</a>");
+    $("#url5").append("<a href=" + result.results["5"].url + " " + 'target="_blank"' + ">" +
+    "Article Link" + "</a>");
+    $("#url6").append("<a href=" + result.results["6"].url + " " + 'target="_blank"' + ">" +
+    "Article Link" + "</a>");
 
 
     document.getElementById("pic").src = result.results["0"].multimedia[3].url;
