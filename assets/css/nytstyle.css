@@ -7,3 +7,16 @@ body {
 #line {
     color:white;
 }
+
+.nav-style:hover {
+    background-color: gray;
+  }
+  
+  .custom-captcha {
+    width: 200px !important;
+    height: 200px !important;
+  }
+
+  .ticker-paragraph {
+    font-family: 'Fira Sans', sans-serif;
+  }

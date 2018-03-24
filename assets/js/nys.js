@@ -96,3 +96,9 @@ $("#search-btn").on("click", function (event) {
 
 });
 
+//clear button 
+function clear() {
+    $("#well-section").empty();
+  }
+
+  $("#clear").on("click", clear);
