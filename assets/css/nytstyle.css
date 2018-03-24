@@ -8,3 +8,11 @@ body {
     color:white;
 }
 
+.nav-style:hover {
+    background-color: gray;
+  }
+  
+  .custom-captcha {
+    width: 200px !important;
+    height: 200px !important;
+  }
