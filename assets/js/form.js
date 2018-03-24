@@ -1,17 +1,22 @@
 
 
 
-  // Initialize Firebase
   var config = {
-    apiKey: "AIzaSyCjxW2V55NbUZt3OqESMS74k0SycmA926k",
-    authDomain: "rutgers-contact-list.firebaseapp.com",
-    databaseURL: "https://rutgers-contact-list.firebaseio.com",
-    projectId: "rutgers-contact-list",
-    storageBucket: "rutgers-contact-list.appspot.com",
-    messagingSenderId: "225697281146"
+    apiKey: "AIzaSyCAuS7wo5kH9qSfnnrenFLboe-mHv7YwYI",
+    authDomain: "fir-2-34d7a.firebaseapp.com",
+    databaseURL: "https://fir-2-34d7a.firebaseio.com",
+    projectId: "fir-2-34d7a",
+    storageBucket: "fir-2-34d7a.appspot.com",
+    messagingSenderId: "768989767189"
   };
+
+
   firebase.initializeApp(config);
   var contactDatabase = firebase.database();
+  
+
+  
+
 $(function()
 {
     function after_form_submitted(data) 
@@ -51,26 +56,30 @@ $(function()
 
 	$('#reused_form').submit(function(e)
       {
+        var name = $("#name").val().trim();
+        var email = $("#email").val().trim();
+        var message = $("#message").val().trim();
         e.preventDefault();
 
         $form = $(this);
         //show some response on the button
         $('button[type="submit"]', $form).each(function()
         {
+            
             $btn = $(this);
             $btn.prop('type','button' ); 
             $btn.prop('orig_label',$btn.text());
             $btn.text('Sending ...');
-        });
-        
 
-                    $.ajax({
-                type: "POST",
-                url: 'handler.php',
-                data: $form.serialize(),
-                success: after_form_submitted,
-                dataType: 'json' 
-            });        
+        });
+        console.log("sent-message");
+        contactDatabase.ref().push({
+            name: name,
+            message: message
+          });
+
+
+          
         
       });	
 });
