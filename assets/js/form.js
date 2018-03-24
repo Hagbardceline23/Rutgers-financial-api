@@ -59,6 +59,7 @@ $(function()
         var name = $("#name").val().trim();
         var email = $("#email").val().trim();
         var message = $("#message").val().trim();
+        var captcha = $("#captcha").val().trim();
         e.preventDefault();
 
         $form = $(this);
@@ -78,16 +79,20 @@ $(function()
             message: message
           });
 
-
-          
+          $("#name").val("");
+          $("#message").val("");
+          $("#email").val("");
+          $("#captcha").val("");
         
       });	
+     
 });
 
 
 
 $(function()
 {
+    
 	$('#captcha_reload').on('click',function(e)
 	{
 	  e.preventDefault();
@@ -95,6 +100,7 @@ $(function()
 	  var src = $("img#captcha_image").attr("src");
 	  src = src.split(/[?#]/)[0];
 	  
-	  $("img#captcha_image").attr("src", src+'?'+d.getTime());
+      $("img#captcha_image").attr("src", src+'?'+d.getTime());
+      
 	});
 });
