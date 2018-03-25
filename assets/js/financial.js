@@ -15,7 +15,7 @@ const AlphaTSSuffix = AlphaSuffix;
 const MinPassLength = 7;
 const InitialCashAvailable = 5000;
 
-// https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&outputsize=full&apikey=demo
+var Reloaded = false;
 
 //
 // ---- VARIABLES ----
@@ -38,13 +38,23 @@ const InitialCashAvailable = 5000;
     "pctChange": 0,
     "companyName": "",
     "website": "",
-    "description": ""
+    "description": "",
+    reset() {
+      this.symbol = "";
+      this.currentPrice = 0;
+      this.previousPrice = 0;
+      this.change = 0;
+      this.pctChange = 0;
+      this.companyName = "";
+      this.website = "";
+      this.description = "";
+    }
   };
 
 
-  firebase.initializeApp(config);
+  var app = firebase.initializeApp(config);
 
-  database = firebase.database();
+  database = app.database();
 
   // **************************************************************************
 
@@ -85,8 +95,18 @@ $(document).ready(() => {
     },
     getBuyPath() {
       return "/users/" + this.uid + "/portfolio/";
+    },
+    reset() {
+      this.email = "";
+      this.firstName = "";
+      this.lastName = "";
+      this.uid = "";
+      this.authenticated = false;
+
+      return true;
     }
   };
+
 
   // -----------------------------------------------------------------------------------------
   // initialize database parent objects
@@ -119,17 +139,17 @@ $(document).ready(() => {
   }
 
   // -----------------------------------------------------------------------------
-  // eraseCurrentWatchlist() emptys out watch table and hides headers
+  // hideWatchlistTable() hides headers of watchlist table
   //
-  function eraseCurrentWatchlist() {
-    var index = 0,
-        tBody = $("<tbody>");
+  function hideWatchlistTable() {
 
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
-    $("#watch-table").remove();
-    tBody.attr("id","watch-table");
-    $("#my-watch-table").append(tBody);
+
+    // $("#watchers-table").hide();
+    // $("#watch-table").remove();
+    // tBody.attr("id","watch-table");
+    // $("#my-watch-table").append(tBody);
 //    $("#stock-ticker-content").empty();
 //    $(".watch-button").remove();
 
@@ -141,13 +161,13 @@ $(document).ready(() => {
   // -----------------------------------------------------------------------------
   // eraseCurrentPortfolio() emptys out portfolio table and hides headers
   //
-  function eraseCurrentPortfolio() {
+  // function eraseCurrentPortfolio() {
 
-    $("#portfolio-table-header").hide();
-    $("#portfolio-caption").hide();
-    $("#portfolio-table").empty();
+  //  $("#portfolio-table-header").hide();
+  //  $("#portfolio-caption").hide();
+  //  $("#portfolio-table").empty();
 
-  }
+  // }
 
   // -----------------------------------------------------------------------------
   // hasAlpha() checks if a string has at least one alphabetic character, lower
@@ -420,12 +440,13 @@ $(document).ready(() => {
       currentWatchRow.companyName = response.companyName;
       currentWatchRow.website = response.website;
       currentWatchRow.description = response.description;
+      $("#stock-input").show();
     }).
     fail(() => {
       console.log("Failure from IEX endpoint stock info function");
       $("#stock-input").show();
 
-      return true;
+      // return true;
     });
   }
 
@@ -499,14 +520,6 @@ $(document).ready(() => {
 
   });
 
-  $("#wlist-button").on("click", (event) => {
-
-    console.log("in wlist-button() ");
-    $("#financial-text").empty();
-
-    event.preventDefault();
-
-  });
 
   // -----------------------------------------------------------------------
   // renderUserWatchlist() renders the logged in user's watch list
@@ -552,6 +565,7 @@ $(document).ready(() => {
     event.preventDefault();
     // empty out stock-ticker content
     $("#stock-ticker-content").empty();
+    $("#my-watch-table").show();
 
     console.log("in addToWatchList() ");
     console.log("stock symbol: " + stockSymbol);
@@ -694,8 +708,36 @@ $(document).ready(() => {
   // add event listener for logout
   //
   $("#btnLogout").on("click", () => {
+    var reConfig = {
+      "apiKey": "AIzaSyBAFhIsrnS798a2VSRGcvbuzSb-woD6z6E",
+      "authDomain": "stocks-info-36826.firebaseapp.com",
+      "databaseURL": "https://stocks-info-36826.firebaseio.com",
+      "projectId": "stocks-info-36826",
+      "storageBucket": "stocks-info-36826.appspot.com",
+      "messagingSenderId": "799807828291"
+    };
+
     console.log("in btnLogout()");
     firebase.auth().signOut();
+    database.ref("users/" + appUser.uid).off();
+    hideWatchlistTable();
+    $("#stock-input").show();
+
+/*     firebase.app().delete().
+      then(() => {
+        app = firebase.initializeApp(reConfig);
+    });
+
+    database = app.database(); */
+
+    // database.goOffline();
+
+    // if (!Reloaded) {
+    //  location.reload();
+    //  Reloaded = true;
+    // }
+    // $("#my-watch-table").remove();
+    // $("#watch-table > tr").slice(0).remove();
   });
 
   // -----------------------------------------------------------------------
@@ -703,13 +745,16 @@ $(document).ready(() => {
   //  one of them is to call render the current user's customized watch list
   //
   function doWhenLoggedIn() {
+
     console.log("in doWhenLoggedIn appUser: " + JSON.stringify(appUser));
     if (appUser.firstName !== "" && appUser.lastName !== "") {
       addUserToDb();
     }
 
+    // Reloaded = false;
+
     // erase current watchlist
-    eraseCurrentWatchlist();
+    // hideWatchlistTable();
     // eraseCurrentPortfolio();
 
     // empty current stock ticker
@@ -724,26 +769,17 @@ $(document).ready(() => {
   //
   function doWhenLoggedOut() {
 
-    appUser.email = "";
-    appUser.firstName = "";
-    appUser.lastName = "";
-    appUser.uid = "";
-    appUser.authenticated = false;
+    appUser.reset();
 
     // erase watchlist
-    eraseCurrentWatchlist();
+    // hideWatchlistTable();
 
     // erase portfolio
     // eraseCurrentPortfolio();
+
     // reset current row
-    currentWatchRow.symbol = "";
-    currentWatchRow.currentPrice = 0;
-    currentWatchRow.previousPrice = 0;
-    currentWatchRow.change = 0;
-    currentWatchRow.pctChange = 0;
-    currentWatchRow.companyName = "";
-    currentWatchRow.website = "";
-    currentWatchRow.description = "";
+    currentWatchRow.reset();
+
   }
 
   // ----------------------------------------------------------------------
@@ -760,15 +796,15 @@ $(document).ready(() => {
       appUser.email = firebaseUser.email;
       appUser.uid = firebaseUser.uid;
       appUser.authenticated = true;
-      database.ref("users/" + appUser.uid).on("child_added", (childSnapshot) => {
+     // database.ref("users/" + appUser.uid).on("child_added", (childSnapshot) => {
         // do stuff with snapshot
-        console.log("childSnapshot: " + JSON.stringify(childSnapshot));
-      });
+      //  console.log("childSnapshot: " + JSON.stringify(childSnapshot));
+      // });
 
       doWhenLoggedIn();
     } else {
       console.log("Not logged in.");
-      database.ref("users/" + appUser.uid).off();
+      // database.ref("users/" + appUser.uid).off();
       $("#btnLogout").addClass("d-none");
       $("#modalLogin").removeClass("d-none");
       $("#modalSignup").removeClass("d-none");
@@ -779,7 +815,7 @@ $(document).ready(() => {
   });
 
   initdb();
- // eraseCurrentWatchlist();
+  hideWatchlistTable();
   // eraseCurrentPortfolio();
 
   // adds the selected stock to watch list

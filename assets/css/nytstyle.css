@@ -1,3 +1,9 @@
+/* nytstyle.css */
+
+* {
+  box-sizing: border-box;
+}
+
 body {
     background: linear-gradient(to bottom, #323232 0%, #3F3F3F 40%, #1C1C1C 150%), linear-gradient(to top, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.25) 200%);
     background-blend-mode: multiply;
@@ -5,7 +11,16 @@ body {
 }
 
 #line {
-    color:white;
+    background-color: lightgray;
+    width: 100%;
+    font-size: 150%;
+    border: 2px solid gray;
+    padding: 8px;
+    margin: 2px;
+    color:#323232;
+    border-radius: 10px;
+    text-align: center;
+    text-shadow: 1px 1px white;
 }
 
 .nav-style:hover {
