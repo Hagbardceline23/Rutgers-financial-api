@@ -37,6 +37,21 @@ body {
     height: 200px !important;
   }
 
+  .custom-remove {
+    margin-left: 5px;
+    font-weight: bold;
+    padding: 0px 2px 2px 2px;
+    color: gray;
+    background: #ffbb33;
+    line-height: 0.9;
+  }
+
+  .custom-remove:hover {
+    color: black;
+    background: #996b0e;
+
+  }
+
   .ticker-paragraph {
     font-family: 'Fira Sans', sans-serif;
   }
