@@ -119,17 +119,16 @@ $(document).ready(() => {
   }
 
   // -----------------------------------------------------------------------------
-  // eraseCurrentWatchlist() emptys out watch table and hides headers
+  // hideWatchlistTable() hides headers of watchlist table
   //
-  function eraseCurrentWatchlist() {
-    var index = 0,
-        tBody = $("<tbody>");
+  function hideWatchlistTable() {
+    // var tBody = $("<tbody>");
 
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
-    $("#watch-table").remove();
-    tBody.attr("id","watch-table");
-    $("#my-watch-table").append(tBody);
+    // $("#watch-table").remove();
+    // tBody.attr("id","watch-table");
+    // $("#my-watch-table").append(tBody);
 //    $("#stock-ticker-content").empty();
 //    $(".watch-button").remove();
 
@@ -141,13 +140,13 @@ $(document).ready(() => {
   // -----------------------------------------------------------------------------
   // eraseCurrentPortfolio() emptys out portfolio table and hides headers
   //
-  function eraseCurrentPortfolio() {
+  // function eraseCurrentPortfolio() {
 
-    $("#portfolio-table-header").hide();
-    $("#portfolio-caption").hide();
-    $("#portfolio-table").empty();
+  //  $("#portfolio-table-header").hide();
+  //  $("#portfolio-caption").hide();
+  //  $("#portfolio-table").empty();
 
-  }
+  // }
 
   // -----------------------------------------------------------------------------
   // hasAlpha() checks if a string has at least one alphabetic character, lower
@@ -695,7 +694,12 @@ $(document).ready(() => {
   //
   $("#btnLogout").on("click", () => {
     console.log("in btnLogout()");
+    database.ref("users/" + appUser.uid).off();
     firebase.auth().signOut();
+    hideWatchlistTable();
+    $("#stock-input").show();
+    // $("#watch-table").empty();
+    // $("#watch-table > tr").slice(0).remove();
   });
 
   // -----------------------------------------------------------------------
@@ -709,7 +713,7 @@ $(document).ready(() => {
     }
 
     // erase current watchlist
-    eraseCurrentWatchlist();
+    // hideWatchlistTable();
     // eraseCurrentPortfolio();
 
     // empty current stock ticker
@@ -731,10 +735,11 @@ $(document).ready(() => {
     appUser.authenticated = false;
 
     // erase watchlist
-    eraseCurrentWatchlist();
+    // hideWatchlistTable();
 
     // erase portfolio
     // eraseCurrentPortfolio();
+
     // reset current row
     currentWatchRow.symbol = "";
     currentWatchRow.currentPrice = 0;
@@ -768,7 +773,7 @@ $(document).ready(() => {
       doWhenLoggedIn();
     } else {
       console.log("Not logged in.");
-      database.ref("users/" + appUser.uid).off();
+      // database.ref("users/" + appUser.uid).off();
       $("#btnLogout").addClass("d-none");
       $("#modalLogin").removeClass("d-none");
       $("#modalSignup").removeClass("d-none");
@@ -779,7 +784,7 @@ $(document).ready(() => {
   });
 
   initdb();
- // eraseCurrentWatchlist();
+  hideWatchlistTable();
   // eraseCurrentPortfolio();
 
   // adds the selected stock to watch list
