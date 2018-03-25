@@ -1,4 +1,17 @@
 /* financial.js */
+// --------------------------------------------------------------------------
+//
+// File name: financial.js
+// Date: March, 2018
+// Author: Fabian Flores
+// Description: This file is a module that makes api requests to populate
+//  a watchlist. It makes use of the alphaVantage and IEx apis. financial.js
+//  also leverages google's firebase to implement login/logout features and
+//  add a customized watchlist branch for users of the site, which is hosted
+//  on https://hagbardceline23.github.io/Rutgers-financial-api/
+//
+// --------------------------------------------------------------------------
+
 // **************************************************************************
 // GLOBALS
 //
@@ -51,12 +64,11 @@ var Reloaded = false;
     }
   };
 
-
   firebase.initializeApp(config);
 
   database = firebase.database();
 
-  // **************************************************************************
+// *************** END OF GLOBALS *******************************************************
 
 $(document).ready(() => {
   var appUser = {
@@ -142,21 +154,17 @@ $(document).ready(() => {
   // hideWatchlistTable() hides headers of watchlist table
   //
   function hideWatchlistTable() {
-
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
-
   }
 
   // -----------------------------------------------------------------------------
   // eraseCurrentPortfolio() emptys out portfolio table and hides headers
   //
   // function eraseCurrentPortfolio() {
-
   //  $("#portfolio-table-header").hide();
   //  $("#portfolio-caption").hide();
   //  $("#portfolio-table").empty();
-
   // }
 
   // -----------------------------------------------------------------------------
@@ -231,8 +239,7 @@ $(document).ready(() => {
 
     console.log("in buyChoices(), buy-id: " + stockToPurchase);
     // Shares you want to purchase:
-    // <input type="number" required="required" name="nshares" min="0" value="0"max="<?= floor($sinfo['ucash']/$sinfo// // ['price']) ?>" />
-    // <input type="hidden" name="ttype" value='BUY' />
+    // <input type="number" required="required" name="nshares" min="0" value="0"max="<shares * price < cashAvailbl>" />
   }
 
   // --------------------------------------------------------------------------
@@ -253,8 +260,7 @@ $(document).ready(() => {
     // read current stock price from database
     database.ref(dbPath).on("value", (snapshot) => {
       dbVal = snapshot.val();
-      console.log("dbVal: " + JSON.stringify(dbVal));
-      console.log("price: " + dbVal.stockPrice);
+      console.log("in renderWatchTable dbVal: " + JSON.stringify(dbVal));
       price = dbVal.stockPrice;
       changeInPrice = dbVal.change;
       pctCh = dbVal.pctChange;
@@ -397,7 +403,6 @@ $(document).ready(() => {
             renderStockInfo(result["Stock Quotes"][0]);
             break;
           case "watch":
-            console.log("buildBatch watch Price: " + numeral(result["Stock Quotes"][0]["2. price"]).format("$0,0.00"));
             currentWatchRow.symbol = sym;
             currentWatchRow.currentPrice = result["Stock Quotes"][0]["2. price"];
             addToWatchDb(sym, result["Stock Quotes"][0]["2. price"]);
@@ -435,8 +440,6 @@ $(document).ready(() => {
     fail(() => {
       console.log("Failure from IEX endpoint stock info function");
       $("#stock-input").show();
-
-      // return true;
     });
   }
 
@@ -516,16 +519,13 @@ $(document).ready(() => {
   //
   function renderUserWatchlist() {
     var dbPath = appUser.getWatchPath();
-    // var firebasePath = "users/" + appUser.uid + "/";
 
-        // empty out stock-ticker content
+    // empty out stock-ticker content
     $("#stock-ticker-content").empty();
 
-    console.log("in renderUserWatchList() ");
-    console.log("appUser.getWatchPath: " + appUser.getWatchPath());
+    console.log("in renderUserWatchList() appUser.getWatchPath: " + appUser.getWatchPath());
 
     database.ref(dbPath).once("value", (snapshot) => {
-      console.log("snapshot: " + JSON.stringify(snapshot));
       snapshot.forEach((data) => {
         console.log("The " + data.key + " is " + data.val());
         // get current price of stock symbol
@@ -538,9 +538,8 @@ $(document).ready(() => {
         renderWatchTable(data.key);
       });
     }, (errorObject) => {
-      console.log("Errors handled: " + JSON.stringify(errorObject));
+      console.log("Errors handled in renderWatchTable: " + JSON.stringify(errorObject));
     });
-    // $("#financial-text").empty();
 
   }
 
@@ -695,7 +694,7 @@ $(document).ready(() => {
   }
 
   // ----------------------------------------------------------------------
-  // add event listener for logout
+  // Event listener for logout button
   //
   $("#btnLogout").on("click", () => {
 
@@ -716,17 +715,10 @@ $(document).ready(() => {
   //  one of them is to call render the current user's customized watch list
   //
   function doWhenLoggedIn() {
-
     console.log("in doWhenLoggedIn appUser: " + JSON.stringify(appUser));
     if (appUser.firstName !== "" && appUser.lastName !== "") {
       addUserToDb();
     }
-
-    // Reloaded = false;
-
-    // erase current watchlist
-    // hideWatchlistTable();
-    // eraseCurrentPortfolio();
 
     // empty current stock ticker
     $("#stock-input").val("");
@@ -735,22 +727,15 @@ $(document).ready(() => {
     renderUserWatchlist();
   }
 
+  // -----------------------------------------------------------------------
   // doWhenLoggedOut() performs series of functions once a user has
   // loggedout
   //
   function doWhenLoggedOut() {
-
     appUser.reset();
-
-    // erase watchlist
-    // hideWatchlistTable();
-
-    // erase portfolio
-    // eraseCurrentPortfolio();
 
     // reset current row
     currentWatchRow.reset();
-
   }
 
   // ----------------------------------------------------------------------
