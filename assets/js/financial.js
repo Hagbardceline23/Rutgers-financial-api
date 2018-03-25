@@ -52,9 +52,9 @@ var Reloaded = false;
   };
 
 
-  var app = firebase.initializeApp(config);
+  firebase.initializeApp(config);
 
-  database = app.database();
+  database = firebase.database();
 
   // **************************************************************************
 
@@ -146,16 +146,6 @@ $(document).ready(() => {
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
 
-    // $("#watchers-table").hide();
-    // $("#watch-table").remove();
-    // tBody.attr("id","watch-table");
-    // $("#my-watch-table").append(tBody);
-//    $("#stock-ticker-content").empty();
-//    $(".watch-button").remove();
-
-//    for (index = 1; index < $("#my-watch-table").length; index++) {
-//      $("#my-watch-table").deleteRow(index); */
-//    }
   }
 
   // -----------------------------------------------------------------------------
@@ -708,14 +698,6 @@ $(document).ready(() => {
   // add event listener for logout
   //
   $("#btnLogout").on("click", () => {
-    var reConfig = {
-      "apiKey": "AIzaSyBAFhIsrnS798a2VSRGcvbuzSb-woD6z6E",
-      "authDomain": "stocks-info-36826.firebaseapp.com",
-      "databaseURL": "https://stocks-info-36826.firebaseio.com",
-      "projectId": "stocks-info-36826",
-      "storageBucket": "stocks-info-36826.appspot.com",
-      "messagingSenderId": "799807828291"
-    };
 
     console.log("in btnLogout()");
     firebase.auth().signOut();
@@ -723,21 +705,10 @@ $(document).ready(() => {
     hideWatchlistTable();
     $("#stock-input").show();
 
-/*     firebase.app().delete().
-      then(() => {
-        app = firebase.initializeApp(reConfig);
-    });
-
-    database = app.database(); */
-
-    // database.goOffline();
-
-    // if (!Reloaded) {
-    //  location.reload();
-    //  Reloaded = true;
-    // }
-    // $("#my-watch-table").remove();
-    // $("#watch-table > tr").slice(0).remove();
+    if (!Reloaded) {
+      location.reload();
+      Reloaded = true;
+    }
   });
 
   // -----------------------------------------------------------------------
