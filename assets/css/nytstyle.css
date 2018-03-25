@@ -10,6 +10,11 @@ body {
 
 }
 
+#watchers-table {
+  width: 100%;
+  font-size: 80%;
+}
+
 #line {
     background-color: lightgray;
     width: 100%;
@@ -21,7 +26,7 @@ body {
     border-radius: 10px;
     text-align: center;
     text-shadow: 1px 1px white;
-}
+  }
 
 .nav-style:hover {
     background-color: gray;
@@ -41,3 +46,20 @@ body {
     text-shadow: 3px 2px #ffbb33;
     font-size: 30px;
   }
+
+/* --------------------------------------------------------------------- */
+/* Breakpoints between 576 and 837pixels */
+@media only screen and (min-width: 576px) and (max-width: 672px) {
+
+  #watchers-table {
+    font-size: 47%;
+  }
+}
+
+@media only screen and (min-width: 673px) and (max-width: 837px) {
+
+  #watchers-table {
+    font-size: 60%;
+  }
+
+}
