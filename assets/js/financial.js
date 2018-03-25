@@ -119,16 +119,16 @@ $(document).ready(() => {
   }
 
   // -----------------------------------------------------------------------------
-  // eraseCurrentWatchlist() emptys out watch table and hides headers
+  // hideWatchlistTable() hides headers of watchlist table
   //
-  function eraseCurrentWatchlist() {
-    var tBody = $("<tbody>");
+  function hideWatchlistTable() {
+    // var tBody = $("<tbody>");
 
     $("#watch-table-header").hide();
     $("#watchlist-caption").hide();
     // $("#watch-table").remove();
-    tBody.attr("id","watch-table");
-    $("#my-watch-table").append(tBody);
+    // tBody.attr("id","watch-table");
+    // $("#my-watch-table").append(tBody);
 //    $("#stock-ticker-content").empty();
 //    $(".watch-button").remove();
 
@@ -696,6 +696,10 @@ $(document).ready(() => {
     console.log("in btnLogout()");
     database.ref("users/" + appUser.uid).off();
     firebase.auth().signOut();
+    hideWatchlistTable();
+    $("#stock-input").show();
+    // $("#watch-table").empty();
+    // $("#watch-table > tr").slice(0).remove();
   });
 
   // -----------------------------------------------------------------------
@@ -709,7 +713,7 @@ $(document).ready(() => {
     }
 
     // erase current watchlist
-    // eraseCurrentWatchlist();
+    // hideWatchlistTable();
     // eraseCurrentPortfolio();
 
     // empty current stock ticker
@@ -731,7 +735,7 @@ $(document).ready(() => {
     appUser.authenticated = false;
 
     // erase watchlist
-    // eraseCurrentWatchlist();
+    // hideWatchlistTable();
 
     // erase portfolio
     // eraseCurrentPortfolio();
@@ -780,7 +784,7 @@ $(document).ready(() => {
   });
 
   initdb();
- // eraseCurrentWatchlist();
+  hideWatchlistTable();
   // eraseCurrentPortfolio();
 
   // adds the selected stock to watch list
